@@ -1,0 +1,171 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+            <script src="deferred.js"> </script>
+
+        <script>
+            window.onload = function() {
+                if (!window.console) {
+                    window.console = {
+                        log: function(str) {
+                            var div = document.createElement("div")
+                            div.innerHTML = str;
+                            document.body.appendChild(div);
+                        }
+                    }
+                }
+  
+
+                var Deferred = typeof when !== "undefined" ? when.defer : window.Deferred;
+              
+                var testName = "otherwise"
+                function  doSomething() {
+                    var dfd = Deferred();
+                    setTimeout(function() {
+                        dfd.resolve(1000)
+                    }, 1000)
+                    return dfd.promise;
+                }
+
+                function aaa() {
+                    var d = Deferred();
+                    setTimeout(function() {
+                        d.resolve(1000)
+                    }, 1000)
+                    return d.promise
+                }
+                function bbb() {
+                    var d = Deferred();
+                    setTimeout(function() {
+                        d.resolve(2000)
+                    }, 2000)
+                    return d.promise
+                }
+                function ccc() {
+                    var d = Deferred();
+                    setTimeout(function() {
+                        d.resolve(500)
+                    }, 500)
+                    return d.promise
+                }
+
+
+                switch (testName) {
+                    case "then":
+                        aaa().then(function(a) {
+                            console.log(a + "resolve 1")
+                            return a + 10
+                        }, function(e) {
+                            console.log(e + "reject 1")
+                            return e
+                        }).then(function(a) {
+                            console.log(a + "resolve 2")
+                            return a
+                        }).then(function(a) {
+                            var dd = Deferred(), t = new Date();
+                            setTimeout(function() {
+                                dd.resolve(a + 100)
+                            }, 2000);
+                            return dd.promise
+                        }).then(function(a) {
+                            console.log(a + "delay2000")
+                        })
+                        break;
+                    case "otherwise":
+                        aaa().then(function(a) {
+                            console.log(a + "resolve 1")
+                            throw "error!"
+                            return a + 10
+                        }, function(e) {
+                            console.log(e + "reject 1")
+                            return e
+                        }).otherwise(function(e) {
+                            console.log(e + " otherwise")
+                        })
+                        break;
+                    case "otherwise2":
+                        (function() {
+                            var dfd = Deferred()
+                            setTimeout(function() {
+                                dfd.reject("error")
+                            }, 1000)
+                            return dfd.promise
+                        })().otherwise(function() {
+                            console.log("000000000000")
+                        }).then(function() {
+                            console.log("111111111111")
+                        }, function() {
+                            console.log("222222222222")
+                        })
+                        break;
+                    case "reject":
+                        break;
+                    case "notify":
+                        function startNotify() {
+                            var dfd = Deferred(), count = 0;
+                            var intervalId = setInterval(function() {
+                                dfd.notify(count++);
+                                count > 10 && clearInterval(intervalId);
+                            }, 500);
+
+                            return dfd.promise;
+                        }
+                        startNotify().then(function(a) {
+                            console.log(a + " resolve 0");
+                            return 10
+                        }, function(a) {
+                            console.log(a + " reject 0")
+                        }, function(a) {
+                            console.log(a + " notify  0")
+                        }).then(function(a) {
+                            console.log(a + " resolve 1");
+                        }, function(a) {
+                            console.log(a + " reject 1")
+                        }, function(a) {
+                            console.log(a + " notify  11111111")
+                        })
+                        break;
+                    case "ensure":
+                        doSomething().then(function() {
+                            console.log("then")
+                        }).otherwise(function() {
+                            console.log("otherwise")
+                        }).ensure(function() {
+                            console.log("ensure")
+                        }).then(function() {
+                            console.log("then2")
+                        }).ensure(function() {
+                            console.log("ensure2")
+                        })
+                        break;
+                    case "ensure2":
+                        doSomething().ensure(function() {
+                            console.log("ensure")
+                            throw "ensure error"
+                        }).otherwise(function(e) {
+                            console.log(e)
+                        })
+                        break;
+                    case "any":
+                        Deferred.any(aaa(), bbb(), ccc()).then(function(a, b) {
+                            console.log(a)
+                        })
+                        break;
+                    case "all":
+                        Deferred.all(aaa(), bbb(), ccc()).then(function(a, b) {
+                            console.log(a)
+                        })
+                        break;
+
+                }
+            }
+
+        </script>
+    </head>
+    <body>
+        <div>TEXT by 司徒正美</div>
+    </body>
+</html>

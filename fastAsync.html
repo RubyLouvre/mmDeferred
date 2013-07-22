@@ -1,0 +1,137 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        <script>
+            window.onload = function() {
+                if (!window.console) {
+                    window.console = {
+                        log: function(str) {
+                            var div = document.createElement("div")
+                            div.innerHTML = str;
+                            document.body.appendChild(div);
+                        }
+                    }
+                }
+
+                function useMutationObserver(a) {
+                    var input = document.createElement("input")
+                    var now = new Date - 0
+                    var BrowserMutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+                    if (!BrowserMutationObserver)
+                        return
+                    var observer = new BrowserMutationObserver(function(mutations) {
+                        mutations.forEach(function() {
+                            console.log(new Date - now + " useMutationObserver")
+                        });
+                    });
+                    observer.observe(input, {attributes: true});
+
+                    input.setAttribute("value", Math.random())
+                }
+                useMutationObserver();
+
+
+
+                function useScriptReadystatechange() {
+                    var now = new Date - 0;
+                    var node = document.createElement("script");
+                    node.onreadystatechange = node.onerror = function() {
+                        console.log(new Date - now + " useScriptReadystatechange")
+                        node.onreadystatechange = node.onerror = function() {
+                        };
+                        node.parentNode && node.parentNode.removeChild(node);
+                        node = null;
+                    };
+                    //  node.src = "xxx"
+                    document.documentElement.appendChild(node);
+                }
+
+
+                useScriptReadystatechange()
+
+
+
+                function usePostMessage() {
+                    // Installs an event handler on `global` for the `message` event: see
+                    // * https://developer.mozilla.org/en/DOM/window.postMessage
+                    // * http://www.whatwg.org/specs/web-apps/current-work/multipage/comms.html#crossDocumentMessages
+                    if (!window.postMessage)
+                        return
+                    function onGlobalMessage(event) {
+                        if (typeof event.data === "string" && event.data.indexOf("usePostMessage") === 0) {
+                            console.log(new Date - now + " usePostMessage")
+                        }
+                    }
+                    if (window.addEventListener) {
+                        window.addEventListener("message", onGlobalMessage, false);
+                    } else {
+                        window.attachEvent("onmessage", onGlobalMessage);
+                    }
+                    var now = new Date - 0;
+                    window.postMessage("usePostMessage" + now, "*");
+                }
+
+
+
+                usePostMessage();
+                function useSetImmediate() {
+
+                    if (window.setImmediate) {
+                        var now = new Date - 0
+                        setImmediate(function() {
+                            console.log(new Date - now + " useSetImmediate")
+                        });
+                    }
+                }
+                useSetImmediate();
+
+                function useMessageChannel() {
+                    //http://caniuse.com/channel-messaging
+                    if (!window.MessageChannel)
+                        return
+                    var channel = new MessageChannel();
+                    channel.port1.onmessage = function(event) {
+                        if (typeof event.data === "string" && event.data.indexOf("MessageChannel") === 0) {
+                            console.log(new Date - now + " useMessageChannel")
+                        }
+                    };
+                    var now = new Date - 0
+                    channel.port2.postMessage("MessageChannel" + now);
+                }
+                useMessageChannel();
+
+                function useImageError() {
+                    var img = new Image();
+                    var now = new Date - 0
+
+                    img.onerror = function() {
+                        img.onerror = function() {
+                        }
+                        console.log((new Date - now) + " useImageError")
+                        img = null;
+                    };
+                    img.src = "data:image/png," + Math.random();
+                }
+                useImageError();
+
+                function useSetTimeout() {
+                    var now = new Date - 0
+                    setTimeout(function() {
+                        console.log((new Date - now) + " useSetTimeout")
+                    }, 0)
+                }
+                useSetTimeout()
+
+
+            }
+
+        </script>
+    </head>
+    <body>
+        <div>TODO write content</div>
+    </body>
+</html>
