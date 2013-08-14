@@ -1,4 +1,4 @@
 mmDeferred
 ==========
 
-一个完全遵循Promise/A+规范的Deferre 库
+一个完全遵循 Promise/A+ 规范的 Deferred 库
