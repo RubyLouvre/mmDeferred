@@ -1,6 +1,7 @@
 (function() {
     //http://www.codingserf.com/index.php/2013/06/dropdownlist2/
-    function Deferred() {
+    // 允许传入一个对象，它将混入到整条Deferred链的所有Promise对象 
+    function Deferred(mixin) {
         var state = "pending", dirty = false;
         function ok(x) {
             return x
@@ -33,6 +34,13 @@
             }
         }
 
+        for(var i in mixin){
+            if(!dfd.promise[i]){
+               dfd.promise[i] = mixin[i]
+            }
+        }
+
+
 //http://thanpol.as/javascript/promises-a-performance-hits-you-should-be-aware-of/
         "resolve,reject,notify".replace(/\w+/g, function(method) {
             dfd[method] = function(val) {
@@ -49,7 +57,7 @@
         })
         return dfd
         function _post() {
-            var deferred = !dirty ? dfd : (dfd.promise._next = Deferred())
+            var deferred = !dirty ? dfd : (dfd.promise._next = Deferred(mixin))
             var index = -1, fns = arguments;
             "resolve,reject,notify, ensure".replace(/\w+/g, function(method) {
                 var fn = fns[++index];
