@@ -2,7 +2,6 @@
     //http://www.codingserf.com/index.php/2013/06/dropdownlist2/
     // 允许传入一个对象，它将混入到整条Deferred链的所有Promise对象 
     function Deferred(mixin) {
-        var state = "pending", dirty = false;
         function ok(x) {
             return x
         }
@@ -16,9 +15,8 @@
                 notify: ok,
                 ensure: ok
             },
-            state: function() {
-                return state
-            },
+            dirty: false,
+            state: "pending",
             promise: {
                 then: function(onResolve, onReject, onNotify) {
                     return _post(onResolve, onReject, onNotify)
@@ -33,57 +31,64 @@
                 _next: null
             }
         }
-
-        for(var i in mixin){
-            if(!dfd.promise[i]){
-               dfd.promise[i] = mixin[i]
+        if (typeof mixin === "function") {
+            mixin(dfd.promise)
+        } else if (mixin && typeof mixin === "object") {
+            for (var i in mixin) {
+                if (!dfd.promise[i]) {
+                    dfd.promise[i] = mixin[i]
+                }
             }
         }
+
 
 
 //http://thanpol.as/javascript/promises-a-performance-hits-you-should-be-aware-of/
         "resolve,reject,notify".replace(/\w+/g, function(method) {
             dfd[method] = function(val) {
-                var that = this
+                var that = this, args = arguments
                 //http://promisesaplus.com/ 4.1
-                if (dirty) {
-                    _fire.call(that, method, val)
+                if (that.dirty) {
+                    _fire.call(that, method, args)
                 } else {
                     Deferred.nextTick(function() {
-                        _fire.call(that, method, val)
+                        _fire.call(that, method, args)
                     })
                 }
             }
         })
         return dfd
         function _post() {
-            var deferred = !dirty ? dfd : (dfd.promise._next = Deferred(mixin))
+            //  var deferred = !this.dirty ? dfd : (dfd.promise._next = Deferred(mixin))
+            //  console.log(deferred.dirty)
             var index = -1, fns = arguments;
             "resolve,reject,notify, ensure".replace(/\w+/g, function(method) {
                 var fn = fns[++index];
                 if (typeof fn === "function") {
-                    deferred.callback[method] = fn;
-                    dirty = true
+                    dfd.callback[method] = fn;
+                    dfd.dirty = true
                 }
             })
+            var deferred = dfd.promise._next = Deferred(mixin)
             return deferred.promise;
         }
 
-        function _fire(method, value) {
-            var next = "resolve";
+        function _fire(method, array) {
+            var next = "resolve", value
             try {
-                if (state === "pending" || method === "notify") {
+                if (this.state === "pending" || method === "notify") {
                     var fn = this.callback[method]
-                    value = fn.call(this, value);
+                    value = fn.apply(this, array);
+                    array = [value]
                     if (method !== "notify") {
-                        state = method === "resolve" ? "fulfilled" : "rejected"  
+                        this.state = method === "resolve" ? "fulfilled" : "rejected"
                     } else {
                         next = "notify"
                     }
                 }
             } catch (e) {
                 next = "reject";
-                value = e;
+                array = [e];
             }
             var ensure = this.callback.ensure
             if (ok !== ensure) {
@@ -91,7 +96,7 @@
                     ensure.call(this)
                 } catch (e) {
                     next = "reject";
-                    value = e;
+                    array = [e];
                 }
             }
             var nextDeferred = this.promise._next
@@ -99,7 +104,7 @@
                 value._next = nextDeferred
             } else {
                 if (nextDeferred) {
-                    _fire.call(nextDeferred, next, value);
+                    _fire.call(nextDeferred, next, array);
                 }
             }
         }

@@ -1,0 +1,48 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script src="deferred.js"></script>
+
+        <script>
+            window.onload = function() {
+                if (!window.console) {
+                    window.console = {
+                        log: function(str) {
+                            var div = document.createElement("div")
+                            div.innerHTML = str;
+                            document.body.appendChild(div);
+                        }
+                    }
+                }
+
+           
+                function  doSomething() {
+                    var dfd = Deferred();
+                    setTimeout(function() {
+                        dfd.resolve(1000)
+                    }, 1000)
+                    return dfd.promise;
+                }
+
+
+                doSomething().then(function(a) {
+                    console.log(a + "resolve 1")
+                    return a + 10
+                }).then(function(a) {
+                    console.log(a + "resolve 2")
+                    return a + 2
+                }).then(function(a) {
+                    console.log(a + "delay2000")
+                })
+
+            }
+
+        </script>
+    </head>
+    <body>
+        <div>TEXT by 司徒正美</div>
+    </body>
+</html>

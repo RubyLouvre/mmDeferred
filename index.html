@@ -21,7 +21,7 @@
 
                 var Deferred = typeof when !== "undefined" ? when.defer : window.Deferred;
               
-                var testName = "otherwise"
+                var testName = "then"
                 function  doSomething() {
                     var dfd = Deferred();
                     setTimeout(function() {
@@ -63,10 +63,11 @@
                             return e
                         }).then(function(a) {
                             console.log(a + "resolve 2")
-                            return a
+                            return a +2
                         }).then(function(a) {
                             var dd = Deferred(), t = new Date();
                             setTimeout(function() {
+                                console.log("setTimeout")
                                 dd.resolve(a + 100)
                             }, 2000);
                             return dd.promise
