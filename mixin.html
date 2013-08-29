@@ -1,0 +1,39 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script src="deferred.js"></script>
+        <script>
+            var obj = {
+                count: 0
+            }
+            function aaa() {
+                var d = Deferred({
+                    setCount: function() {
+                        obj.count += 10
+                        return this
+                    }
+                });
+                setTimeout(function() {
+
+                    d.resolve(1000)
+                }, 1000)
+                return d.promise
+            }
+            console.log(aaa().setCount().then(function() {
+                console.log("then")
+            }).setCount().setCount())
+
+            setTimeout(function() {
+                console.log(obj.count)
+            }, 1000)
+            // aaa().setCount();
+        </script>
+    </head>
+    <body>
+
+        <div>TODO write content</div>
+    </body>
+</html>
