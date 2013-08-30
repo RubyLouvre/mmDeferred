@@ -99,6 +99,7 @@
                 try {
                     value = fn.apply(this, array);
                 } catch (e) {
+                    value = e
                 }
                 if (this.state() === "rejected") {
                     next = "reject"
