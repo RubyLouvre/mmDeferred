@@ -1,7 +1,7 @@
 mmDeferred
 ==========
 
-一个完全遵循Promise/A+规范的Deferre 库
+一个完全遵循Promise/A+规范的Deferred 库
 
 <h3>api</h3>
 <ol>
