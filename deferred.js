@@ -1,8 +1,9 @@
 (function() {
     //http://www.codingserf.com/index.php/2013/06/dropdownlist2/
     // 允许传入一个对象，它将混入到整条Deferred链的所有Promise对象 
+    var noop = function(){}
     function Deferred(mixin) {
-        var state = "pending"
+        var state = "pending", dirty = false
         function ok(x) {
             state = "fulfilled"
             return x
@@ -11,16 +12,17 @@
             state = "rejected"
             throw e
         }
+        
         var dfd = {
             callback: {
                 resolve: ok,
                 reject: ng,
-                notify: function() {
-                },
-                ensure: function() {
-                }
+                notify: noop,
+                ensure: noop
             },
-           dirty: false,
+            dirty: function() {
+                return dirty
+            },
             state: function() {
                 return state
             },
@@ -54,8 +56,7 @@
             dfd[method] = function() {
                 var that = this, args = arguments
                 //http://promisesaplus.com/ 4.1
-                if (that.dirty) {
-                
+                if (that.dirty()) {
                     _fire.call(that, method, args)
                 } else {
                     Deferred.nextTick(function() {
@@ -65,13 +66,13 @@
             }
         })
         return dfd
-        function _post() {
 
+        function _post() {
             var index = -1, fns = arguments;
-            "resolve,reject,notify, ensure".replace(/\w+/g, function(method) {
+            "resolve,reject,notify,ensure".replace(/\w+/g, function(method) {
                 var fn = fns[++index];
                 if (typeof fn === "function") {
-                    dfd.dirty = true
+                    dirty = true
                     if (method === "resolve" || method === "reject") {
                         dfd.callback[method] = function() {
                             try {
@@ -98,7 +99,7 @@
                 var fn = this.callback[method]
                 try {
                     value = fn.apply(this, array);
-                } catch (e) {
+                } catch (e) {//处理notify的异常
                     value = e
                 }
                 if (this.state() === "rejected") {
@@ -109,9 +110,9 @@
                 array = [value]
             }
             var ensure = this.callback.ensure
-            if (ok !== ensure) {
+            if (noop !== ensure) {
                 try {
-                    ensure.call(this)
+                    ensure.call(this)//模拟finally
                 } catch (e) {
                     next = "reject";
                     array = [e];
