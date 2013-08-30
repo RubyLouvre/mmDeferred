@@ -22,26 +22,12 @@
                 }
 
 
-
-                function  aaa() {
-                    var dfd = Deferred();
-                    setTimeout(function() {
-                        dfd.resolve(1000)
-                    }, 1000)
-                    return dfd.promise;
-                }
-
-
-                aaa().then(function(a) {
-                    console.log(a + "resolve 1")
-                    return a + 10
-                }).then(function(a) {
-                    console.log(a + "resolve 2")
-                    return a + 2
-                }).then(function(a) {
-                    console.log(a + "last")
+                var dfd = Deferred()
+                dfd.promise.then(function(a) {
+                    console.log(a)
                 })
-
+                dfd.resolve(1000);//<----只处理第一个，因为处理了就是fulfilled状态，
+                dfd.resolve(2000);//<----这个不执行
             }
 
         </script>

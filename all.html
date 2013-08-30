@@ -21,25 +21,31 @@
                     }
                 }
 
-
-
-                function  aaa() {
-                    var dfd = Deferred();
+                function aaa() {
+                    var d = Deferred();
                     setTimeout(function() {
-                        dfd.resolve(1000)
+                        d.resolve(1000)
                     }, 1000)
-                    return dfd.promise;
+                    return d.promise
+                }
+                function bbb() {
+                    var d = Deferred();
+                    setTimeout(function() {
+                        d.resolve(2000)
+                    }, 2000)
+                    return d.promise
+                }
+                function ccc() {
+                    var d = Deferred();
+                    setTimeout(function() {
+                        d.resolve(500)
+                    }, 500)
+                    return d.promise
                 }
 
-
-                aaa().then(function(a) {
-                    console.log(a + "resolve 1")
-                    return a + 10
-                }).then(function(a) {
-                    console.log(a + "resolve 2")
-                    return a + 2
-                }).then(function(a) {
-                    console.log(a + "last")
+              //待到所有完成才触发
+                Deferred.all(aaa(), bbb(), ccc()).then(function(a) {
+                    console.log(a)
                 })
 
             }
@@ -47,6 +53,7 @@
         </script>
     </head>
     <body>
-        <div>TEST by 司徒正美</div>
+      <div>TEST by 司徒正美</div>
+
     </body>
 </html>

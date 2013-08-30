@@ -8,7 +8,7 @@
 
         <script>
             window.onload = function() {
-                var oldConsole = window.console
+                 var oldConsole = window.console
 
                 window.console = {
                     log: function(str) {
@@ -20,33 +20,25 @@
                         document.body.appendChild(div);
                     }
                 }
-
-
-
-                function  aaa() {
-                    var dfd = Deferred();
+                function aaa() {
+                    var d = Deferred();
                     setTimeout(function() {
-                        dfd.resolve(1000)
+                        d.resolve(1000)
                     }, 1000)
-                    return dfd.promise;
+                    return d.promise
                 }
-
-
-                aaa().then(function(a) {
-                    console.log(a + "resolve 1")
-                    return a + 10
-                }).then(function(a) {
-                    console.log(a + "resolve 2")
-                    return a + 2
-                }).then(function(a) {
-                    console.log(a + "last")
+                aaa().ensure(function() {
+                    console.log("ensure")
+                    throw "ensure error"
+                }).otherwise(function(e) {
+                    console.log(e)
                 })
-
             }
 
         </script>
     </head>
     <body>
         <div>TEST by 司徒正美</div>
+        <p> 在Deferred中，resolve相当于正常的call, apply语句， reject相当于throw语句，otherwise相当于catch 语句，ensure相当于finally语句  </p>
     </body>
 </html>

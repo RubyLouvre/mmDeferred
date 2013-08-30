@@ -16,30 +16,42 @@
                             oldConsole.log(str)
                         }
                         var div = document.createElement("div")
-                        div.innerHTML = window.JSON ? JSON.stringify(str) : str;
+                        div.innerHTML = str;
                         document.body.appendChild(div);
                     }
                 }
 
 
-
-                function  aaa() {
-                    var dfd = Deferred();
+                function aaa() {
+                    var d = Deferred();
                     setTimeout(function() {
-                        dfd.resolve(1000)
+                        d.resolve(1000)
                     }, 1000)
-                    return dfd.promise;
+                    return d.promise
                 }
 
 
                 aaa().then(function(a) {
                     console.log(a + "resolve 1")
                     return a + 10
+                }, function(e) {
+                    console.log(e + "reject 1")
+                    return e
                 }).then(function(a) {
                     console.log(a + "resolve 2")
                     return a + 2
                 }).then(function(a) {
-                    console.log(a + "last")
+                    console.log(a + "resolve 3")
+                    return a + 5
+                }).then(function(a) {
+                    var dd = Deferred()
+                    setTimeout(function() {
+                        console.log("setTimeout")
+                        dd.resolve(a + 100)
+                    }, 2000);
+                    return dd.promise
+                }).then(function(a) {
+                    console.log(a + "delay2000")
                 })
 
             }

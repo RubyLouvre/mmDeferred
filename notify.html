@@ -22,26 +22,30 @@
                 }
 
 
+                function startNotify() {
+                    var dfd = Deferred(), count = 0;
+                    var intervalId = setInterval(function() {
+                        dfd.notify(count++);
+                        count > 10 && clearInterval(intervalId);
+                    }, 500);
 
-                function  aaa() {
-                    var dfd = Deferred();
-                    setTimeout(function() {
-                        dfd.resolve(1000)
-                    }, 1000)
                     return dfd.promise;
                 }
-
-
-                aaa().then(function(a) {
-                    console.log(a + "resolve 1")
-                    return a + 10
+                startNotify().then(function(a) {
+                    console.log(a + " resolve 0");
+                    return 10
+                }, function(a) {
+                    console.log(a + " reject 0")
+                }, function(a) {
+                    console.log(a + " notify  0")
+                    return "N"
                 }).then(function(a) {
-                    console.log(a + "resolve 2")
-                    return a + 2
-                }).then(function(a) {
-                    console.log(a + "last")
+                    console.log(a + " resolve 1");
+                }, function(a) {
+                    console.log(a + " reject 1")
+                }, function(a) {
+                    console.log(a + " notify  1")
                 })
-
             }
 
         </script>

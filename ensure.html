@@ -21,32 +21,30 @@
                     }
                 }
 
-
-
-                function  aaa() {
-                    var dfd = Deferred();
+                function aaa() {
+                    var d = Deferred();
                     setTimeout(function() {
-                        dfd.resolve(1000)
+                        d.resolve(1000)
                     }, 1000)
-                    return dfd.promise;
+                    return d.promise
                 }
-
-
-                aaa().then(function(a) {
-                    console.log(a + "resolve 1")
-                    return a + 10
-                }).then(function(a) {
-                    console.log(a + "resolve 2")
-                    return a + 2
-                }).then(function(a) {
-                    console.log(a + "last")
+                aaa().then(function() {
+                    console.log("then1")
+                }).otherwise(function() {
+                    console.log("otherwise1")
+                }).ensure(function() {
+                    console.log("ensure1")
+                }).then(function() {
+                    console.log("then2")
+                }).ensure(function() {
+                    console.log("ensure2")
                 })
-
             }
 
         </script>
     </head>
     <body>
         <div>TEST by 司徒正美</div>
+        <p> 在Deferred中，resolve相当于正常的call, apply语句， reject相当于throw语句，otherwise相当于catch 语句，ensure相当于finally语句  </p>
     </body>
 </html>

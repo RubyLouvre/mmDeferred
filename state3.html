@@ -15,7 +15,7 @@
                         if (oldConsole) {
                             oldConsole.log(str)
                         }
-                        var div = document.createElement("div")
+                        var div = document.createElement("div") 
                         div.innerHTML = window.JSON ? JSON.stringify(str) : str;
                         document.body.appendChild(div);
                     }
@@ -23,25 +23,15 @@
 
 
 
-                function  aaa() {
-                    var dfd = Deferred();
-                    setTimeout(function() {
-                        dfd.resolve(1000)
-                    }, 1000)
-                    return dfd.promise;
-                }
+                var dfd = Deferred()
+                console.log(dfd.state() + "====================")
 
+                dfd.notify(1000);
 
-                aaa().then(function(a) {
-                    console.log(a + "resolve 1")
-                    return a + 10
-                }).then(function(a) {
-                    console.log(a + "resolve 2")
-                    return a + 2
-                }).then(function(a) {
-                    console.log(a + "last")
-                })
-
+                setTimeout(function() {
+                    console.log(dfd.state()+"====================")
+                    console.log(dfd.promise)
+                },1000)
             }
 
         </script>

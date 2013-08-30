@@ -22,24 +22,28 @@
                 }
 
 
-
-                function  aaa() {
-                    var dfd = Deferred();
+                function aaa() {
+                    var dfd = Deferred()
                     setTimeout(function() {
-                        dfd.resolve(1000)
+                        dfd.reject("error")
                     }, 1000)
-                    return dfd.promise;
+                    return dfd.promise
                 }
-
-
-                aaa().then(function(a) {
-                    console.log(a + "resolve 1")
-                    return a + 10
-                }).then(function(a) {
-                    console.log(a + "resolve 2")
-                    return a + 2
-                }).then(function(a) {
-                    console.log(a + "last")
+                aaa().otherwise(function() {
+                    console.log("ng 000000000000")
+                }).then(function() {
+                    console.log("ok 111111111111")
+                }, function() {
+                    console.log("ng 111111111111")
+                }).then(function() {
+                    console.log("ok 22222222222")
+                    throw "throw"
+                }, function() {
+                    console.log("ng 222222222222")
+                }).then(function() {
+                    console.log("ok 33333333333")
+                }, function() {
+                    console.log("ng 33333333333")
                 })
 
             }

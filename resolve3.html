@@ -22,26 +22,19 @@
                 }
 
 
+                var dfd = Deferred()
 
-                function  aaa() {
-                    var dfd = Deferred();
-                    setTimeout(function() {
-                        dfd.resolve(1000)
-                    }, 1000)
-                    return dfd.promise;
-                }
-
-
-                aaa().then(function(a) {
-                    console.log(a + "resolve 1")
-                    return a + 10
-                }).then(function(a) {
-                    console.log(a + "resolve 2")
-                    return a + 2
-                }).then(function(a) {
-                    console.log(a + "last")
+                dfd.promise.then(function(a, b, c) {
+                    console.log(a)// 得到多个参数
+                    console.log(b)
+                    console.log(c)
+                    return 4000
+                }).then(function(a, b, c) {
+                    console.log(a)//得到上次的结果
+                    console.log(b)
+                    console.log(c)
                 })
-
+                dfd.resolve(1000, 2000, 3000);//传入多个参数
             }
 
         </script>

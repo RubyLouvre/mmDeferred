@@ -2,21 +2,28 @@
     //http://www.codingserf.com/index.php/2013/06/dropdownlist2/
     // 允许传入一个对象，它将混入到整条Deferred链的所有Promise对象 
     function Deferred(mixin) {
+        var state = "pending"
         function ok(x) {
+            state = "fulfilled"
             return x
         }
         function ng(e) {
+            state = "rejected"
             throw e
         }
         var dfd = {
             callback: {
                 resolve: ok,
                 reject: ng,
-                notify: ok,
-                ensure: ok
+                notify: function() {
+                },
+                ensure: function() {
+                }
             },
-            dirty: false,
-            state: "pending",
+           dirty: false,
+            state: function() {
+                return state
+            },
             promise: {
                 then: function(onResolve, onReject, onNotify) {
                     return _post(onResolve, onReject, onNotify)
@@ -42,13 +49,13 @@
         }
 
 
-
 //http://thanpol.as/javascript/promises-a-performance-hits-you-should-be-aware-of/
         "resolve,reject,notify".replace(/\w+/g, function(method) {
-            dfd[method] = function(val) {
+            dfd[method] = function() {
                 var that = this, args = arguments
                 //http://promisesaplus.com/ 4.1
                 if (that.dirty) {
+                
                     _fire.call(that, method, args)
                 } else {
                     Deferred.nextTick(function() {
@@ -59,14 +66,26 @@
         })
         return dfd
         function _post() {
-            //  var deferred = !this.dirty ? dfd : (dfd.promise._next = Deferred(mixin))
-            //  console.log(deferred.dirty)
+
             var index = -1, fns = arguments;
             "resolve,reject,notify, ensure".replace(/\w+/g, function(method) {
                 var fn = fns[++index];
                 if (typeof fn === "function") {
-                    dfd.callback[method] = fn;
                     dfd.dirty = true
+                    if (method === "resolve" || method === "reject") {
+                        dfd.callback[method] = function() {
+                            try {
+                                var value = fn.apply(this, arguments)
+                                state = "fulfilled"
+                                return value
+                            } catch (err) {
+                                state = "rejected"
+                                return err
+                            }
+                        }
+                    } else {
+                        dfd.callback[method] = fn;
+                    }
                 }
             })
             var deferred = dfd.promise._next = Deferred(mixin)
@@ -75,20 +94,18 @@
 
         function _fire(method, array) {
             var next = "resolve", value
-            try {
-                if (this.state === "pending" || method === "notify") {
-                    var fn = this.callback[method]
+            if (this.state() === "pending" || method === "notify") {
+                var fn = this.callback[method]
+                try {
                     value = fn.apply(this, array);
-                    array = [value]
-                    if (method !== "notify") {
-                        this.state = method === "resolve" ? "fulfilled" : "rejected"
-                    } else {
-                        next = "notify"
-                    }
+                } catch (e) {
                 }
-            } catch (e) {
-                next = "reject";
-                array = [e];
+                if (this.state() === "rejected") {
+                    next = "reject"
+                } else if (method === "notify") {
+                    next = "notify"
+                }
+                array = [value]
             }
             var ensure = this.callback.ensure
             if (ok !== ensure) {
