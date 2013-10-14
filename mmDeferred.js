@@ -1,6 +1,8 @@
-(function() {
-    //无依赖版
-    var noop = function(){}
+define("mmDeferred", ["avalon"], function(avalon) {
+    //http://www.codingserf.com/index.php/2013/06/dropdownlist2/
+    // 允许传入一个对象，它将混入到整条Deferred链的所有Promise对象 
+    var noop = function() {
+    }
     function Deferred(mixin) {
         var state = "pending", dirty = false
         function ok(x) {
@@ -11,7 +13,7 @@
             state = "rejected"
             throw e
         }
-        
+
         var dfd = {
             callback: {
                 resolve: ok,
@@ -160,48 +162,11 @@
     }
     Deferred.any = function() {
         return some(true, arguments)
-    };
+    }
+    Deferred.nextTick = avalon.nextTick
 //http://www.raychase.net/1329
 //http://www.cnblogs.com/iamzhanglei/archive/2013/02/24/2924680.html
-    var BrowserMutationObserver = window.MutationObserver || window.WebKitMutationObserver;
-    if (BrowserMutationObserver) {//chrome firefox
-        Deferred.nextTick = function(callback) {
-            var input = document.createElement("input")
-            var observer = new BrowserMutationObserver(function(mutations) {
-                mutations.forEach(function() {
-                    callback()
-                });
-            });
-            observer.observe(input, {attributes: true});
-            input.setAttribute("value", Math.random())
-        }
-    } else if (window.VBArray) {//IE
-        Deferred.nextTick = function(callback) {
-            var node = document.createElement("script");
-            node.onreadystatechange = function() {
-                callback()
-                node.onreadystatechange = null
-                node.parentNode && node.parentNode.removeChild(node);
-                node = null;
-            };
-            document.documentElement.appendChild(node);
-        }
-    } else if (window.postMessage && window.addEventListener) {//safar opera
-        Deferred.nextTick = function(callback) {
-            function onGlobalMessage(event) {
-                if (typeof event.data === "string" && event.data.indexOf("usePostMessage") === 0) {
-                    callback()
-                }
-            }
-            window.addEventListener("message", onGlobalMessage);
-            var now = new Date - 0;
-            window.postMessage("usePostMessage" + now, "*");
-        }
-    } else {
-        Deferred.nextTick = function(callback) {
-            setTimeout(callback, 0)
-        }
-    }
+    return Deferred
+})
 
 
-})()
