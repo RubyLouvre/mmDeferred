@@ -164,7 +164,7 @@
 //http://www.raychase.net/1329
 //http://www.cnblogs.com/iamzhanglei/archive/2013/02/24/2924680.html
     var BrowserMutationObserver = window.MutationObserver || window.WebKitMutationObserver;
-    if (BrowserMutationObserver) {//chrome firefox
+    if (BrowserMutationObserver) {//Chrome, Firefox
         Deferred.nextTick = function(callback) {
             var input = document.createElement("input")
             var observer = new BrowserMutationObserver(function(mutations) {
@@ -186,7 +186,7 @@
             };
             document.documentElement.appendChild(node);
         }
-    } else if (window.postMessage && window.addEventListener) {//safar opera
+    } else if (window.postMessage && window.addEventListener) {//Safari, Opera
         Deferred.nextTick = function(callback) {
             function onGlobalMessage(event) {
                 if (typeof event.data === "string" && event.data.indexOf("usePostMessage") === 0) {
