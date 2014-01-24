@@ -13,7 +13,7 @@ mmDeferred
         reject会将对象改变成"rejected"；notify与ensure不会改变状态；
     </li>
     <li>promise: 位于Deferred对象上， 一个对象属性，拥有then, otherwise, ensure方法，是负责收集回调的<br/>
-        （相当而言，Deferred对象则有resolve, reject, notify方法，是负责触发回调的）<li>
+        （相当而言，Deferred对象则有resolve, reject, notify方法，是负责触发回调的）</li>
     <li>then(resolvefn,rejectfn,notifyfn, ensurefn)，位于Promise对象上，依次用来重写默认的"resolve,reject,notify, ensur"回调</li>
     <li>ensure: 位于Promise对象上，重写默认的ensure回调——该回调不接受参数，是总会触发的回调</li>
     <li>otherwise 位于Promise对象上，重写默认的rejected回调——出错时触发的回调</li>
