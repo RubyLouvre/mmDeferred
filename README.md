@@ -36,6 +36,7 @@ mmDeferred
     <li><a href="otherwise2.html">otherwise2</a></li>
     <li><a href="then.html">then</a></li>
     <li><a href="then2.html">then2</a></li>
+    <li><a href="then3.html">then2</a></li>
     <li><a href="ensure.html">ensure</a></li>
     <li><a href="ensure2.html">ensure2</a></li>
     <li><a href="all.html">all</a></li>
