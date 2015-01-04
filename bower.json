@@ -1,0 +1,23 @@
+{
+  "name": "mmDeferred",
+  "main": "mmPromise.js",
+  "version": "0.1",
+  "homepage": "https://github.com/RubyLouvre/mmDeferred",
+  "authors": [
+    "RubyLouvre"
+  ],
+  "description": "一个完全遵循Promise/A+规范的Deferred 库",
+  "keywords": [
+    "promise",
+    "avalon",
+    "Deferred"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
