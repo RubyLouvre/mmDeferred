@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width">
+        <script src="avalon.js">
+
+        </script>
+        <script>
+            require(["mmPromise"], function(a) {
+                console.log(a)
+                var d = a.defer()
+                setTimeout(function() {
+                    d.resolve(3);
+                }, 40);
+            })
+        </script>
+    </head>
+    <body>
+        <pre>
+       The full list of nonstandard methods:
+
+- Promise.defer
+- Promise.accept
+- Promise.prototype.chain
+        </pre>
+    </body>
+</html>
