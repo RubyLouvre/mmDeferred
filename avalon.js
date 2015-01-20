@@ -5,7 +5,7 @@
  http://weibo.com/jslouvre/
  
  Released under the MIT license
- avalon.js 1.39 build in 2015.1.19 
+ avalon.js 1.39 build in 2015.1.20 
 _____________________________________
  support IE6+ and other browsers
  ==================================================*/
@@ -4689,13 +4689,15 @@ new function() {
 
     var cur = getCurrentScript(true) //求得当前avalon.js 所在的JS文件的路径
     if (!cur) { //处理window safari的Error没有stack的问题
-        cur = avalon.slice(DOC.scripts).pop().src
+        cur = DOC.scripts[DOC.scripts.length - 1].src
     }
     var url = trimHashAndQuery(cur)
-    kernel.massUrl = url.slice(0, url.lastIndexOf("/") + 1)
+    kernel.loaderUrl = url.slice(0, url.lastIndexOf("/") + 1)
 
-    function getBaseUrl() {
-        return typeof kernel.baseUrl === "string" ? kernel.baseUrl : kernel.massUrl
+    function getBaseUrl(parentUrl) {
+        return kernel.baseUrl ? kernel.baseUrl : parentUrl ?
+                parentUrl.substr(0, parentUrl.lastIndexOf("/")) :
+                kernel.loaderUrl
     }
 
     function getCurrentScript(base) {
@@ -4729,7 +4731,10 @@ new function() {
         var nodes = (base ? DOC : head).getElementsByTagName("script") //只在head标签中寻找
         for (var i = nodes.length, node; node = nodes[--i]; ) {
             if ((base || node.className === subscribers) && node.readyState === "interactive") {
-                return node.className = node.src
+                var url = node.src
+                if (!isAbsUrl(url))
+                    url = node.getAttribute("src", 4)
+                return node.className = url
             }
         }
     }
@@ -4743,10 +4748,7 @@ new function() {
         var dn = 0  //需要安装的模块数
         var cn = 0  // 已安装完的模块数
         var id = parentUrl || "callback" + setTimeout("1")
-        parentUrl = kernel.baseUrl ? kernel.baseUrl : parentUrl ?
-                parentUrl.substr(0, parentUrl.lastIndexOf("/")) :
-                kernel.massUrl
-
+        parentUrl = getBaseUrl(parentUrl)
         array.forEach(function(el) {
             var url = loadResources(el, parentUrl) //加载资源，并返回能加载资源的完整路径
             if (url) {
@@ -4760,14 +4762,8 @@ new function() {
                 }
             }
         })
-        factory = factory || noop
-        modules[id] = {//保存此模块的相关信息
-            id: id,
-            factory: factory,
-            deps: deps,
-            args: args,
-            state: 1
-        }
+        modules[id] = makeModule(id, 1, factory || noop, deps, args)//保存此模块的相关信息
+
         if (dn === cn) { //如果需要安装的等于已安装好的
             fireFactory(id, args, factory) //安装到框架中
         } else {
@@ -4793,11 +4789,8 @@ new function() {
         factory.id = id //用于调试
 
         if (!modules[url] && id) {
-            modules[url] = {//必须先行定义，并且不存在deps，用于checkCycle方法
-                id: url,
-                factory: factory,
-                state: 1
-            }
+            ////必须先行定义，并且不存在deps，用于checkCycle方法
+            modules[url] = makeModule(url, 1, factory)
         }
 
         factory.require = function(url) {
@@ -4865,7 +4858,7 @@ new function() {
         }
     }
 
-    function isAbs(path) {
+    function isAbsUrl(path) {
         //http://stackoverflow.com/questions/10687099/how-to-test-if-a-url-string-is-absolute-or-relative
         return  /^(?:[a-z]+:)?\/\//i.test(String(path))
     }
@@ -4919,6 +4912,15 @@ new function() {
         }
         return fn
     }
+    function makeModule(id, state, factory, deps, args) {
+        return {
+            id: id,
+            state: state,
+            factory: factory,
+            deps: deps,
+            args: args
+        }
+    }
 
     function getGlobal(value) {
         if (!value) {
@@ -4932,7 +4934,7 @@ new function() {
     }
 
     function loadResources(url, parentUrl) {
-        //1. 特别处理mass|ready标识符
+        //1. 特别处理ready标识符
         if (url === "ready!" || (modules[url] && modules[url].state === 2)) {
             return url
         }
@@ -4983,9 +4985,9 @@ new function() {
             }
         }
         //5. 转换为绝对路径
-        if (!isAbs(url)) {
+        if (!isAbsUrl(url)) {
             url = joinPath(parentUrl, url)
-            if (!isAbs(url)) {
+            if (!isAbsUrl(url)) {
                 url = getAbsUrl(url, getBaseUrl())
             }
         }
@@ -5068,15 +5070,12 @@ new function() {
 
 
     plugins.js = function(url, shim) {
-        if (!isAbs(url)) {
-            url = getAbsUrl(url, getBaseUrl())
-        }
+//        if (!isAbsUrl(url)) {
+//            url = getAbsUrl(url, getBaseUrl())
+//        }
         var id = trimHashAndQuery(url)
         if (!modules[id]) { //如果之前没有加载过
-            var module = modules[id] = {
-                id: id,
-                exports: void 0
-            }
+            var module = modules[id] = makeModule(id)
             if (shim) { //shim机制
                 innerRequire(shim.deps || [], function() {
                     var args = avalon.slice(arguments)
