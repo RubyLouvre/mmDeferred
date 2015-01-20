@@ -7,7 +7,7 @@ define(["avalon"], function(avalon) {
     if (/native code/.test(window.Promise)) {
         mmPromise = window.Promise
     } else {
-        var mmPromise = function(executor) {
+        var msPromise = function(executor) {
             this._callbacks = []
             var that = this
             if (typeof this !== 'object')

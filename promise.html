@@ -8,12 +8,15 @@
 
         </script>
         <script>
-            require(["mmPromise"], function(a) {
-                console.log(a)
-                var d = a.defer()
-                setTimeout(function() {
-                    d.resolve(3);
-                }, 40);
+            require(["mmPromise"], function(promise) {
+
+                var d = promise.defer()
+                d.promise.then(function(a){
+                    avalon.log(a + 333)
+                })
+                
+                d.resolve(111)
+                avalon.log("这里会先执行")
             })
         </script>
     </head>
