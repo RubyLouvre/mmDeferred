@@ -139,6 +139,8 @@ define(["avalon"], function(avalon) {
             iterable = Array.isArray(iterable) ? iterable : []
             var n = 0, result = [], end
             return new msPromise(function(resolve, reject) {
+                // 空数组直接resolve
+                if(!iterable.length) resolve()
                 function loop(a, index) {
                     a.then(function(ret) {
                         if (!end) {
@@ -188,7 +190,7 @@ define(["avalon"], function(avalon) {
             return ret
         }
     }
-    return avalon.Promise = mmPromise
+    return window.Promise = avalon.Promise = mmPromise
 })
 //https://github.com/ecomfe/er/blob/master/src/Deferred.js
 //http://jser.info/post/77696682011/es6-promises
