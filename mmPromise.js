@@ -207,7 +207,6 @@ define("nativePromise", ["avalon"], function(avalon) {
     if (/native code/.test(nativePromise)) {
         nativePromise.prototype.done = done
         nativePromise.prototype.fail = fail
-        nativePromise.any = nativePromise.race
         if (!nativePromise.defer) { //chrome实现的私有方法
             nativePromise.defer = defer
         }
