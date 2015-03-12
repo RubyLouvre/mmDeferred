@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+    <head lang="en">
+        <meta charset="UTF-8">
+        <title></title>
+        <script src="avalon.js"></script>
+        <!--        <script src="promise.js"></script>-->
+        <script>
+            require(["./mmPromise"], function(msPromise) {
+
+                window.console = {
+                    log: function(str) {
+                        var div = document.createElement("div")
+                        div.innerHTML = str;
+                        document.body.appendChild(div);
+                    }
+                }
+                var p = new msPromise(function(f) {
+                    f(1000)
+                })
+                p.async = false
+                p.xxx = 33
+                var p2 = p.then(function(a) {
+                    console.log(a)
+                    throw 55
+                    return a + 1
+                }, function(a) {
+                    console.log(a)
+                    return a - 1
+                })
+                console.log(p2.xxx + "!!!!!!!!!")
+                console.log(p2.async + "!!!!!!!!!")
+                var p3 = p2.then(function(a) {
+                    console.log(a)
+                    return a + 1
+                }, function(a) {
+                    console.log("++++++++++++")
+                    console.log(a)
+                    return a - 1
+                }).then(function(a) {
+                    console.log("________________")
+                    console.log(a)
+                    return a + 1
+                }, function(a) {
+                    console.log(a)
+                    return a - 1
+                })
+                console.log(p3.xxx + "!!!!!!!!!")
+                console.log(p3.async + "!!!!!!!!!")
+            })
+
+
+
+        </script>
+    </head>
+    <body ms-controller="test">
+
+        <h1>添加类似jquery.Deferred的功能，支持同步，支持继承之前Promise的方法与属性</h1>
+
+    </body>
+</html>
