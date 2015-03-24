@@ -1,0 +1,44 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script src="avalon.js"></script>
+        <script>
+            window.onload = function () {
+                var oldConsole = window.console
+
+                window.console = {
+                    log: function (str) {
+                        if (oldConsole) {
+                            oldConsole.log(str)
+                        }
+                        var div = document.createElement("div")
+                        div.innerHTML = str;
+                        document.body.appendChild(div);
+                    }
+                }
+
+                require(["newPromise"], function () {
+                    new Promise(function (resolve, reject) {
+                        reject(1000)
+                    })["catch"](function (a) {
+                        console.log(a + "; catch 1")
+                       
+                    })["catch"](function (e) {
+                        console.log(e + "; catch 2")
+                        
+                    })["catch"](function (e) {
+                        console.log(e + "; catch 3")
+                    })
+                })
+
+            }
+
+        </script>
+    </head>
+    <body>
+        <div>TEST by 司徒正美</div>
+    </body>
+</html>
