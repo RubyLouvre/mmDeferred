@@ -4,34 +4,35 @@
     <head>
         <title></title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <script src="deferred.js"></script>
+        <script src="avalon.js"></script>
 
         <script>
-            window.onload = function() {
+            window.onload = function () {
                 var oldConsole = window.console
-
                 window.console = {
-                    log: function(str) {
+                    log: function (str) {
                         if (oldConsole) {
                             oldConsole.log(str)
                         }
-                        var div = document.createElement("div") 
+                        var div = document.createElement("div")
                         div.innerHTML = window.JSON ? JSON.stringify(str) : str;
                         document.body.appendChild(div);
                     }
                 }
 
+                require(["newPromise"], function () {
+                    var p = new avalon.Promise(function (resolve, reject) {
+                        reject(1000)
+                    })
+                    console.log(p._state + "  ; 应该输出rejected")
+                    p.then(function (a) {
+                       console.log("这里不应该输出")
+                    }, function (e) {
+                        console.log((this == window) + " ; 应该返回true,等于window")
+                        console.log(e + " ; 应该返回1000")
+                    })
+                })
 
-
-                var dfd = Deferred()
-                console.log(dfd.state() + "====================")
-
-                dfd.reject(1000);
-
-                setTimeout(function() {
-                    console.log(dfd.state()+"====================")
-                    console.log(dfd.promise)
-                },1000)
             }
 
         </script>

@@ -5,13 +5,13 @@
         <title></title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script src="deferred.js"></script>
-
+        <script src="avalon.js"></script>
         <script>
-            window.onload = function() {
+            window.onload = function () {
                 var oldConsole = window.console
 
                 window.console = {
-                    log: function(str) {
+                    log: function (str) {
                         if (oldConsole) {
                             oldConsole.log(str)
                         }
@@ -24,26 +24,47 @@
 
                 function aaa() {
                     var dfd = Deferred()
-                    setTimeout(function() {
+                    setTimeout(function () {
                         dfd.reject("error")
                     }, 1000)
                     return dfd.promise
                 }
-                aaa().otherwise(function() {
+                aaa().otherwise(function () {
                     console.log("ng 000000000000")
-                }).then(function() {
+                }).then(function () {
                     console.log("ok 111111111111")
-                }, function() {
+                }, function () {
                     console.log("ng 111111111111")
-                }).then(function() {
+                }).then(function () {
                     console.log("ok 22222222222")
                     throw "throw"
-                }, function() {
+                }, function () {
                     console.log("ng 222222222222")
-                }).then(function() {
+                }).then(function () {
                     console.log("ok 33333333333")
-                }, function() {
+                }, function () {
                     console.log("ng 33333333333")
+                })
+
+                require(["newPromise"], function () {
+                    new avalon.Promise(function (resolve, reject) {
+                        reject(1000)
+                    })["catch"](function (a) {
+                        console.log("then ng 0  " + a)
+                    }).then(function () {
+                        console.log("then ok 1")
+                    }, function () {
+                        console.log("then ng 1")
+                    }).then(function () {
+                        console.log("then ok 2")
+                        throw "throw"
+                    }, function () {
+                        console.log("then ng 2")
+                    }).then(function () {
+                        console.log("then ok 3")
+                    }, function () {
+                        console.log("then ng 3")
+                    })
                 })
 
             }

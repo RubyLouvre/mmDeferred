@@ -121,30 +121,28 @@ define("nativePromise", ["avalon"], function(avalon) {
     function _resolve(promise, value) {//触发成功回调
         if (promise._state !== "pending")
             return;
-        promise._state = "fulfilled"
         if (value && typeof value.then === "function") {
 //thenable对象使用then，Promise实例使用_then
             var method = value instanceof msPromise ? "_then" : "then"
             value[method](function(val) {
-                _transmit(promise, val)
+                _transmit(promise, val, true)
             }, function(reason) {
-                promise._state = "rejected"
-                _transmit(promise, reason)
+                _transmit(promise, reason, false)
             });
         } else {
-            _transmit(promise, value);
+            _transmit(promise, value, true);
         }
     }
     function _reject(promise, value) {//触发失败回调
         if (promise._state !== "pending")
             return
-        promise._state = "rejected"
-        _transmit(promise, value)
+        _transmit(promise, value, false)
     }
 //改变Promise的_fired值，并保持用户传参，触发所有回调
-    function _transmit(promise, value) {
+    function _transmit(promise, value, isResolved) {
         promise._fired = true;
-        promise._value = value;
+        promise._value = value
+        promise._state = isResolved ? "fulfilled" : "rejected"
         fireCallbacks(promise, function() {
             promise._callbacks.forEach(function(data) {
                 promise._fire(data.onSuccess, data.onFail);

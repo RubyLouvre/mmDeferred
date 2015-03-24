@@ -4,14 +4,14 @@
     <head>
         <title></title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <script src="deferred.js"></script>
+        <script src="avalon.js"></script>
 
         <script>
-            window.onload = function() {
+            window.onload = function () {
                 var oldConsole = window.console
 
                 window.console = {
-                    log: function(str) {
+                    log: function (str) {
                         if (oldConsole) {
                             oldConsole.log(str)
                         }
@@ -20,15 +20,20 @@
                         document.body.appendChild(div);
                     }
                 }
+                require(["newPromise"], function () {
+                    var _resolve
+                    var p = new avalon.Promise(function (resolve, reject) {
+                        _resolve = resolve
+                    })
+                    _resolve(1000);//<----只处理第一个，因为处理了就是fulfilled状态，
+                    //由于resolve时，Deferred的回调还没有就绪，它就延后执行
+                    _resolve(2000);//<----这个不执行  
+                    p.then(function (a) {
+                        console.log((a === 1000) + "; 只能等于1000,延后执行")
+                    })
 
-
-                var dfd = Deferred()
-                dfd.resolve(2000);//<---只处理第一个，因为处理了就是fulfilled状态，
-                //由于resolve时，Deferred的回调还没有就绪，它就延后执行
-                dfd.resolve(1000);//<---这个不执行
-                dfd.promise.then(function(a) {
-                    console.log(a)
                 })
+
 
             }
 

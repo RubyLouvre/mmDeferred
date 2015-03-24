@@ -5,13 +5,13 @@
         <title></title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script src="deferred.js"></script>
-
+        <script src="avalon.js"></script>
         <script>
-            window.onload = function() {
+            window.onload = function () {
                 var oldConsole = window.console
 
                 window.console = {
-                    log: function(str) {
+                    log: function (str) {
                         if (oldConsole) {
                             oldConsole.log(str)
                         }
@@ -24,23 +24,39 @@
 
                 function aaa() {
                     var d = Deferred();
-                    setTimeout(function() {
+                    setTimeout(function () {
                         d.resolve(1000)
                     }, 1000)
                     return d.promise
                 }
 
 
-                aaa().then(function(a) {
-                    console.log(a + "resolve 1")
+                aaa().then(function (a) {
+                    console.log(a + "::resolve 1")
                     throw "error!"
                     return a + 10
-                }, function(e) {
-                    console.log(e + "reject 1")
+                }, function (e) {
+                    console.log(e + "::reject 1")
                     return e
-                }).otherwise(function(e) {
-                    console.log(e + " otherwise")
+                }).otherwise(function (e) {
+                    console.log(e + "::otherwise")
                 })
+
+                require(["newPromise"], function () {
+                    new avalon.Promise(function (resolve, reject) {
+                        resolve(1000)
+                    }).then(function (a) {
+                        console.log(a + "; resolve 1")
+                        throw "error!"
+                        return a + 10
+                    }, function (e) {
+                        console.log(e + "; reject 1")
+                        return e
+                    })["catch"](function (e) {
+                        console.log(e + "; otherwise")
+                    })
+                })
+
             }
 
         </script>
