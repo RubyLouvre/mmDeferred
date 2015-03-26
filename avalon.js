@@ -5,7 +5,7 @@
  http://weibo.com/jslouvre/
  
  Released under the MIT license
- avalon.js 1.41 built in 2015.3.23
+ avalon.js 1.41 built in 2015.3.26
  support IE6+ and other browsers
  ==================================================*/
 (function(global, factory) {
@@ -53,6 +53,7 @@ function log() {
 var subscribers = "$" + expose
 var otherRequire = window.require
 var otherDefine = window.define
+var innerRequire
 var stopRepeatAssign = false
 var rword = /[^, ]+/g //切割字符串为一个个小块，以空格或豆号分开它们，结合replace实现字符串的forEach
 var rcomplexType = /^(?:object|array)$/
@@ -723,8 +724,7 @@ if (window.SVGElement) {
     var svg = DOC.createElementNS(svgns, "svg")
     svg.innerHTML = '<circle cx="50" cy="50" r="40" fill="red" />'
     if (!rsvg.test(svg.firstChild)) { // #409
-        /* jshint ignore:start */
-        function enumerateNode(node, targetNode) {
+        function enumerateNode(node, targetNode) {// jshint ignore:line
             if (node && node.childNodes) {
                 var nodes = node.childNodes
                 for (var i = 0, el; el = nodes[i++]; ) {
@@ -733,7 +733,7 @@ if (window.SVGElement) {
                                 el.tagName.toLowerCase())
                         ap.forEach.call(el.attributes, function (attr) {
                             svg.setAttribute(attr.name, attr.value) //复制属性
-                        })
+                        })// jshint ignore:line
                         // 递归处理子节点
                         enumerateNode(el, svg)
                         targetNode.appendChild(svg)
@@ -741,7 +741,6 @@ if (window.SVGElement) {
                 }
             }
         }
-        /* jshint ignore:end */
         Object.defineProperties(SVGElement.prototype, {
             "outerHTML": {//IE9-11,firefox不支持SVG元素的innerHTML,outerHTML属性
                 enumerable: true,
@@ -915,13 +914,14 @@ function escapeRegExp(target) {
     //将字符串安全格式化为正则表达式的源码
     return (target + "").replace(rregexp, "\\$&")
 }
-var innerRequire = noop
+
 var plugins = {
-    loader: function(builtin) {
-        window.define = builtin ? innerRequire.define : otherDefine
-        window.require = builtin ? innerRequire : otherRequire
+    loader: function (builtin) {
+        var flag = innerRequire && builtin
+        window.require = flag ? innerRequire : otherRequire
+        window.define = flag ? innerRequire.define : otherDefine
     },
-    interpolate: function(array) {
+    interpolate: function (array) {
         openTag = array[0]
         closeTag = array[1]
         if (openTag === closeTag) {
