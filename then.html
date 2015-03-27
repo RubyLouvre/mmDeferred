@@ -4,14 +4,14 @@
     <head>
         <title></title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <script src="deferred.js"></script>
+        <script src="newPromise.js"></script>
 
         <script>
-            window.onload = function() {
+            window.onload = function () {
                 var oldConsole = window.console
 
                 window.console = {
-                    log: function(str) {
+                    log: function (str) {
                         if (oldConsole) {
                             oldConsole.log(str)
                         }
@@ -21,25 +21,39 @@
                     }
                 }
 
+                var p = new Promise(function (r) {
+                    r("先resolve值然后再添加回调")
+                })
+                setTimeout(function () {
+                    p.then(function (a) {
+                        console.log(a)
+                        return 1
+                    })
+                    p.then(function (a) {
+                        console.log(a)
+                        return 1
+                    })
+                    p.then(function (a) {
+                        console.log(a)
+                    })
+                }, 1000)
 
 
-                function  aaa() {
-                    var dfd = Deferred();
-                    setTimeout(function() {
-                        dfd.resolve(1000)
-                    }, 1000)
-                    return dfd.promise;
-                }
-
-
-                aaa().then(function(a) {
-                    console.log(a + "resolve 1")
-                    return a + 10
-                }).then(function(a) {
-                    console.log(a + "resolve 2")
-                    return a + 2
-                }).then(function(a) {
-                    console.log(a + "last")
+                var p2 = new Promise(function (r) {
+                    setTimeout(function () {
+                        r("先添加回调后resolve数据")
+                    }, 2000)
+                })
+                p2.then(function (a) {
+                    console.log(a)
+                    return 2
+                })
+                p2.then(function (a) {
+                    console.log(a)
+                    return 2
+                })
+                p2.then(function (a) {
+                    console.log(a)
                 })
 
             }

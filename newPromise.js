@@ -1,58 +1,110 @@
-
-function _resolve(promise, value) {//触发成功回调
-    if (promise._state !== "pending")
-        return;
-    if (value && typeof value.then === "function") {
-//thenable对象使用then，Promise实例使用_then
-        var method = value instanceof msPromise ? "_then" : "then"
-        value[method](function (val) {
-            _transmit(promise, val, true)
-        }, function (reason) {
-            _transmit(promise, reason, false)
-        });
-    } else {
-        _transmit(promise, value, true);
-    }
-}
-function _reject(promise, value) {//触发失败回调
-    if (promise._state !== "pending")
-        return
-    _transmit(promise, value, false)
-}
-
-
-
-var msPromise = function (executor) {
-    this._callbacks = []
-    var me = this
+function Promise(fn) {
     if (typeof this !== "object")
         throw new TypeError("Promises must be constructed via new")
-    if (typeof executor !== "function")
+    if (typeof fn !== "function")
         throw new TypeError("not a function")
-
     var state = "pending"
-    var lock = {}
-    var fireArgs = lock
-    var doneList = []
-    var failList = []
-
-    executor(function (value) {
-        if (state === "pending") //如果还处于原始状态,才可以resolve
-            _resolve(me, doneList, value, fired)
-    }, function (reason) {
-        if (state === "pending")//如果还处于原始状态,才可以reject
-            _reject(me, failList, reason, fired)
-    })
+    var value = null
+    var callbacks = []
+    var self = this
 
     this.then = function (onFulfilled, onRejected) {
-        
-        onFulfilled = typeof onFulfilled === "function" ? onFulfilled : ok
-        onRejected = typeof onRejected === "function" ? onRejected : ng
-        doneList.push(onFulfilled)
-        failList.push(onRejected)
-        return new msPromise(function () {
-
+        return new self.constructor(function (resolve, reject) {
+            handle(handlerFactory(onFulfilled, onRejected, resolve, reject))
         })
+    }
 
+    function handle(deferred) {
+        if (state === "pending") {
+            callbacks.push(deferred)
+            return
+        };
+        (function () {
+            var cb = state ? deferred.onFulfilled : deferred.onRejected
+            if (cb === null) {
+                (state ? deferred.resolve : deferred.reject)(value)
+                return
+            }
+            var ret
+            try {
+                ret = cb(value)
+            } catch (e) {
+                deferred.reject(e)
+                return
+            }
+            deferred.resolve(ret)
+        })()
+    }
+
+    function resolve(newValue) {
+        try { //Promise Resolution Procedure: https://github.com/promises-aplus/promises-spec#the-promise-resolution-procedure
+            if (newValue === self)
+                throw new TypeError("A promise cannot be resolved with itself.")
+            //如果传入的是一个Promise或是一个thenable对象
+            if (newValue && (typeof newValue === "object" || typeof newValue === "function")) {
+                var then = newValue.then
+                if (typeof then === "function") {
+                    doResolve(then.bind(newValue), resolve, reject)
+                    return
+                }
+            }
+            state = true
+            value = newValue
+            finale()
+        } catch (e) {
+            reject(e)
+        }
+    }
+
+    function reject(newValue) {
+        state = false
+        value = newValue
+        finale()
+    }
+
+    function finale() {
+        for (var i = 0, len = callbacks.length; i < len; i++)
+            handle(callbacks[i])
+        callbacks = null
+    }
+
+    doResolve(fn, resolve, reject)
+}
+
+
+function handlerFactory(onFulfilled, onRejected, resolve, reject) {
+    return {
+        onFulfilled: typeof onFulfilled === "function" ? onFulfilled : null,
+        onRejected: typeof onRejected === "function" ? onRejected : null,
+        resolve: resolve,
+        reject: reject
+    }
+}
+
+/**
+ * Take a potentially misbehaving resolver function and make sure
+ * onFulfilled and onRejected are only called once.
+ *
+ * Makes no guarantees about asynchrony.
+ */
+function doResolve(fn, onFulfilled, onRejected) {
+    var done = false;
+    try {
+        fn(function (value) {
+            if (done)
+                return
+            done = true
+            onFulfilled(value)
+        }, function (reason) {
+            if (done)
+                return
+            done = true
+            onRejected(reason)
+        })
+    } catch (ex) {
+        if (done)
+            return
+        done = true
+        onRejected(ex)
     }
 }
