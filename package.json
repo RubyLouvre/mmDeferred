@@ -1,0 +1,20 @@
+{
+  "name": "avalon-promise",
+  "version": "0.4.0",
+  "description": "avalon official",
+  "main": "mmPromise.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RubyLouvre/mmDeferred.git"
+  },
+  "files":["mmPromise.js","package.json"],
+  "author": "RubyLouvre",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/RubyLouvre/mmDeferred/issues"
+  },
+  "homepage": "https://github.com/RubyLouvre/mmDeferred#readme"
+}
