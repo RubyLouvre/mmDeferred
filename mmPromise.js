@@ -1,12 +1,12 @@
 var nativePromise = window.Promise
-if (/native code/.test(nativePromise)) {
+if (/native code/.test(nativePromise)) {//判定浏览器是否支持原生Promise
     module.exports = nativePromise
 } else {
     var RESOLVED = 0
     var REJECTED = 1
     var PENDING = 2
 
-
+    //实例化Promise
     function Promise(executor) {
 
         this.state = PENDING
@@ -26,18 +26,21 @@ if (/native code/.test(nativePromise)) {
         }
     }
 
-    Promise.reject = function (r) {
-        return new Promise(function (resolve, reject) {
-            reject(r)
-        })
-    }
-
+    //迅速实例化Promise,指定数据与末来状态
     Promise.resolve = function (x) {
         return new Promise(function (resolve, reject) {
             resolve(x)
         })
     }
-
+    //迅速实例化Promise,指定数据与末来状态
+    Promise.reject = function (r) {
+        return new Promise(function (resolve, reject) {
+            reject(r)
+        })
+    }
+    //Promise.all 接收一个 promise对象的数组作为参数，
+    //当这个数组里的所有promise对象全部变为resolve或reject状态的时候，
+    //它才会去调用 .then 方法。
     Promise.all = function (iterable) {
         return new Promise(function (resolve, reject) {
             var count = 0, result = []
@@ -62,7 +65,8 @@ if (/native code/.test(nativePromise)) {
             }
         })
     }
-
+    //Promise.race 只要有一个promise对象进入 FulFilled 或者 Rejected 状态的话，
+    //就会继续进行后面的处理。换言之,谁的异步时间最短,谁就会被处理.
     Promise.race = function (iterable) {
         return new Promise(function (resolve, reject) {
             for (var i = 0; i < iterable.length; i += 1) {
@@ -72,7 +76,20 @@ if (/native code/.test(nativePromise)) {
     }
 
     var p = Promise.prototype
-
+    //构建Promise列队,并将要执行的函数与传参存储到最初的Promise.deferred数组中
+    p.then = function then(onResolved, onRejected) {
+        var promise = this
+        //onResolved, onRejected用于接受上一个Promise的传参
+        //它们返回的结果,用于resolve, reject方法执行下一个Promise
+        return new Promise(function (resolve, reject) {
+            promise.deferred.push([onResolved, onRejected, resolve, reject])
+            promise.notify()//执行回调
+        })
+    }
+    //p.then的语法糖
+    p.catch = function (onRejected) {
+        return this.then(undefined, onRejected)
+    }
     p.resolve = function resolve(x) {
         var promise = this
 
@@ -85,7 +102,8 @@ if (/native code/.test(nativePromise)) {
 
             try {
                 var then = x && x['then']
-
+                //如果是Promise或是thenable对象,
+                //那么将执行后的结果继续传给现在这个Promise resolve /rejcet
                 if (x !== null && typeof x === 'object' && typeof then === 'function') {
                     then.call(x, function (x) {
                         if (!called) {
@@ -130,9 +148,9 @@ if (/native code/.test(nativePromise)) {
 
     p.notify = function notify() {
         var promise = this
-
+        //根据Promise规范,必须异步执行存储好的回调
         nextTick(function () {
-            if (promise.state !== PENDING) {
+            if (promise.state !== PENDING) {//确保状态是从pending -> resloved/rejected
                 while (promise.deferred.length) {
                     var deferred = promise.deferred.shift(),
                             onResolved = deferred[0],
@@ -162,33 +180,6 @@ if (/native code/.test(nativePromise)) {
         })
     }
 
-    p.then = function then(onResolved, onRejected) {
-        var promise = this
-
-        return new Promise(function (resolve, reject) {
-            promise.deferred.push([onResolved, onRejected, resolve, reject])
-            promise.notify()
-        })
-    }
-
-    p.catch = function (onRejected) {
-        return this.then(undefined, onRejected)
-    }
-
-
-    function oneObject(array, val) {
-        if (typeof array === "string") {
-            array = array.match(rword) || []
-        }
-        var result = {},
-                value = val !== void 0 ? val : 1
-        for (var i = 0, n = array.length; i < n; i++) {
-            result[array[i]] = value
-        }
-        return result
-    }
-
-
     /*视浏览器情况采用最快的异步回调*/
     var nextTick = new function () {// jshint ignore:line
         var tickImmediate = window.setImmediate
@@ -208,7 +199,7 @@ if (/native code/.test(nativePromise)) {
 
         if (tickObserver) {
             var node = document.createTextNode("avalon")
-            new tickObserver(callback).observe(node, {characterData: true})// jshint ignore:line
+            new tickObserver(callback).observe(node, {characterData: true})
             var bool = false
             return function (fn) {
                 queue.push(fn)
@@ -225,7 +216,6 @@ if (/native code/.test(nativePromise)) {
 
     module.exports = Promise
 }
-
 
 //https://github.com/ecomfe/er/blob/master/src/Deferred.js
 //http://jser.info/post/77696682011/es6-promises
